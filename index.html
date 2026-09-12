@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATH MISSION SPEKIDU - Media Pembelajaran FPB & KPK SD N Pedurungan Kidul 02</title>
+
+    <!-- Chosen Palette: Vibrant Spekidu Game Palette (Primary Sky Blue #0284c7, Game Gold #f59e0b, Bright Coral #f97316, Emerald Green #10b981, Royal Purple #8b5cf6, Spekidu Red #dc2626, Soft Pastel Background #f0f9ff) -->
+    
+    <!-- Application Structure Plan: Single Page Application (SPA) Math Mission Spekidu dirancang dengan tema branding khusus "MATH MISSION SPEKIDU". Struktur aplikasi mencakup: 1. Top Navigation Bar persisten dengan indikator skor, nama siswa, logo Spekidu, dan kontrol Audio/BGM. 2. Screen Loading animasi khas Spekidu dengan progress bar & tips matematika. 3. Splash Screen utama beranimasi dengan banner kayu hero Spekidu, visual ilustrasi interaktif, serta menu aksi utama. 4. Form Login Explorer Spekidu (Nama, Kelas, No. Absen). 5. Modul Tujuan Pembelajaran & Petunjuk Permainan. 6. Interactive Stepping Mission Map 4 Lokasi Spekidu dengan sistem pembuka level berurutan. 7. Arena Gameplay dengan visualisasi DOM interaktif kontekstual (Keranjang Apel FPB, Lampu Lalu Lintas KPK, Kalender Masjid KPK, Lapangan Olahraga FPB/KPK). 8. Modal Feedback Pop-up dengan tombol penjelas petunjuk langkah. 9. Result Screen/Sertifikat Lencana Master Explorer dengan selebrasi confetti. -->
+
+    <!-- Visualization & Content Choices: 
+       - Spekidu Brand Header & Hero Banner -> HTML/CSS Wooden Banner Signboard + Badge Spekidu + Image -> Goal: Memberikan identitas visual utama aplikasi "MATH MISSION SPEKIDU".
+       - Dynamic Loading Overlay -> Animated HTML progress bar + tip acak -> Goal: Memberikan umpan balik visual yang menyenangkan saat perpindahan layar tanpa delay kaku.
+       - Stepping Mission Map -> Styled Card Nodes dengan indikator status terkunci/terbuka/selesai -> Goal: Memberikan progresi permainan yang terstruktur dan memotivasi siswa.
+       - Dynamic Canvas/DOM Scenario Visualizers -> HTML/CSS animated elements (Apel, Signal Lights, Kalender, Bola) -> Goal: Memvisualisasikan soal cerita matematika secara konkret tanpa SVG.
+       - Selebrasi Kemenangan -> Canvas Confetti Library & Sound Synthesizer -> Goal: Mengapresiasi pencapaian belajar siswa.
+       - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'spekidu-blue': '#0284c7',
+                        'spekidu-sky': '#0ea5e9',
+                        'spekidu-yellow': '#fbbf24',
+                        'spekidu-amber': '#f59e0b',
+                        'spekidu-orange': '#ea580c',
+                        'spekidu-green': '#10b981',
+                        'spekidu-purple': '#8b5cf6',
+                        'spekidu-red': '#dc2626',
+                    },
+                    fontFamily: {
+                        sans: ['Fredoka', 'Quicksand', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'cartoon': '0px 8px 0px #0f172a',
+                        'cartoon-sm': '0px 4px 0px #0f172a',
+                        'cartoon-btn': '0px 6px 0px #092540',
+                        'wood': '0px 6px 0px #451a03',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', 'Quicksand', sans-serif;
+            background: radial-gradient(circle at top left, #e0f2fe 0%, #bae6fd 40%, #7dd3fc 100%);
+            min-height: 100vh;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .btn-cartoon {
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-cartoon:hover {
+            transform: translateY(-3px);
+        }
+        .btn-cartoon:active {
+            transform: translateY(3px);
+            box-shadow: 0px 1px 0px #0f172a !important;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+            50% { transform: scale(1.25) rotate(18deg); filter: brightness(1.3); }
+        }
+        .sparkle-anim {
+            animation: sparkle 1.8s infinite ease-in-out;
+        }
+
+        .wood-banner {
+            background: linear-gradient(180deg, #92400e 0%, #78350f 50%, #451a03 100%);
+            box-shadow: 0 8px 0 #270e02, inset 0 2px 4px rgba(255,255,255,0.4);
+        }
+        .wood-ribbon {
+            background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+            box-shadow: 0 4px 0 #451a03;
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        .floating {
+            animation: float-slow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        .pulse-btn {
+            animation: pulse-bounce 2s infinite ease-in-out;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen justify-between overflow-x-hidden p-2 sm:p-4">
+
+    <!-- HEADER NAVIGATION PERSISTENT -->
+    <header id="top-header" class="max-w-5xl mx-auto w-full bg-white/95 backdrop-blur-md rounded-2xl p-3 mb-4 border-4 border-slate-900 shadow-cartoon-sm flex flex-wrap justify-between items-center gap-2 z-30">
+        <div class="flex items-center gap-3">
+            <div class="bg-spekidu-red text-white p-2 rounded-xl border-3 border-slate-900 font-black flex items-center justify-center w-11 h-11 shadow-sm text-sm tracking-tighter">
+                SD02
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-lg sm:text-2xl font-black leading-none text-spekidu-blue tracking-wide uppercase">
+                        MATH MISSION SPEKIDU
+                    </h1>
+                    <span class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-slate-900 shadow-sm hidden sm:inline-block">OFFICIAL APP</span>
+                </div>
+                <p class="text-[11px] sm:text-xs font-bold text-slate-600">
+                    SD N Pedurungan Kidul 02 • Kelas 5 SD
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 ml-auto">
+            <div id="student-badge" class="hidden sm:flex items-center gap-2 bg-amber-100 border-2 border-slate-900 px-3 py-1 rounded-xl text-xs font-black text-slate-800">
+                <i class="fa-solid fa-graduation-cap text-spekidu-orange text-sm"></i>
+                <span id="nav-player-name">Explorer</span>
+            </div>
+
+            <div id="score-badge" class="flex items-center gap-1.5 bg-spekidu-yellow border-3 border-slate-900 px-3.5 py-1.5 rounded-xl font-black text-slate-900 text-sm sm:text-base shadow-sm">
+                <i class="fa-solid fa-star text-white drop-shadow sparkle-anim text-base"></i>
+                <span id="nav-score">0</span> <span class="text-[10px] font-bold">PTS</span>
+            </div>
+
+            <button id="bgm-btn" onclick="toggleBGM()" title="Musik Latar Spekidu" class="w-10 h-10 bg-amber-100 border-2 border-slate-900 rounded-xl flex items-center justify-center text-amber-900 hover:bg-amber-200 btn-cartoon">
+                <i id="bgm-icon" class="fa-solid fa-music text-base"></i>
+            </button>
+
+            <button id="sound-btn" onclick="toggleAudio()" title="Efek Suara" class="w-10 h-10 bg-slate-100 border-2 border-slate-900 rounded-xl flex items-center justify-center text-slate-800 hover:bg-slate-200 btn-cartoon">
+                <i id="sound-icon" class="fa-solid fa-volume-high text-base"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-5xl mx-auto w-full flex-grow flex flex-col justify-center items-center my-auto">
+
+        <!-- SCREEN LOADING / TRANSITION OVERLAY -->
+        <section id="screen-loading" class="hidden w-full max-w-xl bg-white/95 rounded-3xl p-6 sm:p-8 border-4 border-slate-900 shadow-cartoon flex flex-col items-center text-center relative overflow-hidden">
+            
+            <div class="bg-amber-100 text-amber-950 text-xs font-black px-3.5 py-1 rounded-full border-2 border-slate-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-compass animate-spin text-spekidu-orange"></i>
+                <span id="loading-badge-text">MEMUAT MISI SPEKIDU...</span>
+            </div>
+
+            <div class="relative w-full h-32 bg-gradient-to-b from-sky-200 to-amber-100 border-3 border-slate-900 rounded-2xl p-2 overflow-hidden flex items-end justify-between mb-4 shadow-inner">
+                <div class="absolute top-2 left-4 text-sky-400 text-3xl floating">☁️</div>
+                <div class="absolute top-3 right-6 text-yellow-400 text-3xl floating" style="animation-delay: 1s">☀️</div>
+
+                <div class="z-10 flex items-center gap-2 text-2xl mb-1 ml-2">
+                    <span>🏫</span>
+                    <span class="text-xs font-black bg-white px-2 py-0.5 rounded border border-slate-900">SDN PK 02</span>
+                </div>
+
+                <div id="loading-avatar" class="z-20 flex flex-col items-center">
+                    <span class="text-3xl animate-bounce">👦🏻</span>
+                    <span class="text-xs font-black bg-amber-300 px-2 py-0.5 rounded-full border border-slate-900 -mt-1">Spekidu Explorer</span>
+                </div>
+
+                <div class="z-10 flex items-center gap-2 text-2xl mb-1 mr-2">
+                    <span id="loading-destination-icon" class="text-3xl">📍</span>
+                </div>
+
+                <div class="absolute bottom-0 left-0 right-0 h-3 bg-amber-800 border-t-2 border-slate-900"></div>
+            </div>
+
+            <h2 id="loading-title" class="text-xl sm:text-2xl font-black text-spekidu-blue mb-1">
+                Menyiapkan Petualangan...
+            </h2>
+            <p id="loading-subtitle" class="text-xs sm:text-sm text-slate-600 font-bold mb-5">
+                Mengakses Data FPB & KPK Lingkungan Pedurungan Kidul
+            </p>
+
+            <div class="w-full bg-slate-200 h-6 rounded-full border-3 border-slate-900 p-0.5 overflow-hidden relative shadow-inner mb-4">
+                <div id="loading-progress-bar" class="bg-gradient-to-r from-spekidu-yellow via-spekidu-orange to-spekidu-green h-full rounded-full transition-all duration-300 w-0 flex items-center justify-end pr-2">
+                    <span class="text-[10px] font-black text-slate-900">⚡</span>
+                </div>
+            </div>
+
+            <div class="w-full bg-yellow-50 border-2 border-slate-900 rounded-xl p-3 text-left flex items-start gap-3 shadow-sm">
+                <div class="text-2xl text-spekidu-orange">💡</div>
+                <div>
+                    <span class="text-[11px] font-black text-slate-800 uppercase block tracking-wider">Tahukah Kamu? (Tips Math Spekidu)</span>
+                    <p id="loading-tip" class="text-xs font-extrabold text-slate-700 leading-snug">
+                        FPB (Faktor Persekutuan Terbesar) digunakan ketika kamu ingin membagi benda menjadi beberapa wadah dengan jumlah yang sama banyak!
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. SPLASH SCREEN -->
+        <section id="screen-splash" class="w-full bg-white/95 rounded-3xl p-4 sm:p-6 border-4 border-slate-900 shadow-cartoon flex flex-col items-center text-center relative overflow-hidden">
+            
+            <!-- Header Wood Banner -->
+            <div class="relative mb-3 mt-1 max-w-xl w-full flex flex-col items-center">
+                <div class="wood-banner border-4 border-amber-950 rounded-3xl px-6 py-3 text-white relative flex flex-col items-center w-full">
+                    <span class="absolute -top-3 -left-2 bg-blue-500 text-white font-black text-lg w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center shadow rotate-[-12deg]">+</span>
+                    <span class="absolute -top-3 -right-2 bg-purple-500 text-white font-black text-lg w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center shadow rotate-[12deg]">×</span>
+                    <span class="absolute -bottom-2 -left-3 bg-green-500 text-white font-black text-lg w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center shadow rotate-[8deg]">÷</span>
+                    <span class="absolute -bottom-2 -right-3 bg-orange-500 text-white font-black text-lg w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center shadow rotate-[-8deg]">-</span>
+
+                    <h1 class="text-3xl sm:text-5xl font-black text-amber-300 drop-shadow-[0_4px_0_#451a03] tracking-wider uppercase">
+                        MATH MISSION
+                    </h1>
+                    <h2 class="text-xl sm:text-3xl font-black text-emerald-400 drop-shadow-[0_3px_0_#064e3b] tracking-wide uppercase -mt-1">
+                        SPEKIDU
+                    </h2>
+                </div>
+                <div class="wood-ribbon border-3 border-amber-950 rounded-xl px-5 py-1 text-white -mt-3 z-10 font-black text-xs sm:text-sm tracking-wider shadow-md">
+                    SD NEGERI PEDURUNGAN KIDUL 02
+                </div>
+            </div>
+
+            <!-- Custom Hero Image Banner SPEKIDU -->
+            <div class="w-full max-w-3xl border-4 border-slate-900 rounded-2xl my-2 overflow-hidden shadow-cartoon-sm bg-sky-100 flex items-center justify-center relative group">
+                <img src="https://i.ibb.co.com/wZ2Gw5Qb/Chat-GPT-Image-Sep-9-2026-02-04-01-PM.png" alt="Math Mission Spekidu SD N Pedurungan Kidul 02" class="w-full h-auto max-h-[350px] object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+                <div class="absolute top-3 left-3 bg-white/90 backdrop-blur border-2 border-slate-900 px-3 py-1 rounded-xl text-xs font-black text-slate-800 shadow">
+                    📍 Lingkungan Pedurungan Kidul
+                </div>
+            </div>
+
+            <p class="text-xs sm:text-base text-slate-700 font-extrabold my-2 italic max-w-xl">
+                “Berani menerima misi? Jelajahi lingkungan sekitar sekolah Spekidu dan pecahkan setiap tantangan matematika!”
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md mt-1">
+                <button onclick="startAppWithLoading()" class="sm:col-span-2 bg-spekidu-green hover:bg-emerald-600 text-white font-black text-xl py-3.5 px-6 rounded-2xl border-4 border-slate-900 shadow-cartoon-btn btn-cartoon flex items-center justify-center gap-2 pulse-btn">
+                    <i class="fa-solid fa-play text-yellow-300"></i> ▶ MULAI MISI EXPLORER
+                </button>
+                <button onclick="triggerLoadingTransition('screen-objectives', 'Memuat Tujuan Belajar...')" class="bg-spekidu-blue hover:bg-sky-600 text-white font-bold text-base py-2.5 px-4 rounded-xl border-3 border-slate-900 shadow-cartoon-sm btn-cartoon flex items-center justify-center gap-2">
+                    🎯 TUJUAN BELAJAR
+                </button>
+                <button onclick="triggerLoadingTransition('screen-instructions', 'Memuat Petunjuk Game...')" class="bg-spekidu-purple hover:bg-purple-600 text-white font-bold text-base py-2.5 px-4 rounded-xl border-3 border-slate-900 shadow-cartoon-sm btn-cartoon flex items-center justify-center gap-2">
+                    ❓ PETUNJUK GAME
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. LOGIN SCREEN -->
+        <section id="screen-login" class="hidden w-full max-w-lg bg-white/95 rounded-3xl p-6 sm:p-8 border-4 border-slate-900 shadow-cartoon flex flex-col items-center">
+            <div class="bg-spekidu-yellow p-3 rounded-2xl border-3 border-slate-900 mb-3 text-3xl text-slate-900 shadow-sm">
+                👤
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-1">
+                LOGIN EXPLORER SPEKIDU
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 font-bold mb-5">
+                Masukkan identitas dirimu sebelum bertualang
+            </p>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="w-full flex flex-col gap-4">
+                <div>
+                    <label class="block text-sm font-black text-slate-800 mb-1">Nama Lengkap Siswa:</label>
+                    <input type="text" id="input-name" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-3 bg-slate-50 border-3 border-slate-900 rounded-xl font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-300">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-black text-slate-800 mb-1">Kelas SD:</label>
+                        <select id="input-class" class="w-full px-4 py-3 bg-slate-50 border-3 border-slate-900 rounded-xl font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-300">
+                            <option value="5 A">5 A</option>
+                            <option value="5 B">5 B</option>
+                            <option value="5 C">5 C</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-black text-slate-800 mb-1">No. Absen:</label>
+                        <input type="number" id="input-absent" required min="1" max="50" placeholder="15" class="w-full px-4 py-3 bg-slate-50 border-3 border-slate-900 rounded-xl font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-300">
+                    </div>
+                </div>
+
+                <button type="submit" class="mt-4 bg-spekidu-green hover:bg-emerald-600 text-white font-black text-lg py-3.5 px-6 rounded-2xl border-4 border-slate-900 shadow-cartoon-btn btn-cartoon flex items-center justify-center gap-2">
+                    🟢 MASUK & MULAI MISI
+                </button>
+            </form>
+
+            <button onclick="triggerLoadingTransition('screen-splash', 'Kembali ke Menu Utama...')" class="mt-4 text-slate-500 font-extrabold hover:text-slate-800 text-sm">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu Utama
+            </button>
+        </section>
+
+        <!-- 3. LEARNING OBJECTIVES SCREEN -->
+        <section id="screen-objectives" class="hidden w-full bg-white/95 rounded-3xl p-6 sm:p-8 border-4 border-slate-900 shadow-cartoon flex flex-col items-center">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="text-3xl bg-sky-200 p-2 rounded-2xl border-2 border-slate-900 shadow-sm">🎯</div>
+                <h2 class="text-2xl sm:text-3xl font-black text-spekidu-blue uppercase">TUJUAN PEMBELAJARAN</h2>
+            </div>
+
+            <div class="w-full max-w-2xl bg-sky-50 border-3 border-slate-900 rounded-2xl p-4 sm:p-6 mb-6">
+                <p class="font-extrabold text-slate-800 mb-3 text-sm sm:text-base">
+                    Setelah menyelesaikan game Math Mission Spekidu ini, siswa kelas 5 SD diharapkan mampu:
+                </p>
+
+                <ul class="flex flex-col gap-3 font-semibold text-slate-800 text-xs sm:text-sm">
+                    <li class="flex items-start gap-2 bg-white p-3 rounded-xl border-2 border-slate-800 shadow-sm">
+                        <i class="fa-solid fa-circle-check text-spekidu-green mt-1 text-base"></i>
+                        <span><strong>Menentukan FPB</strong> (Faktor Persekutuan Terbesar) dari dua atau lebih bilangan dengan tepat.</span>
+                    </li>
+                    <li class="flex items-start gap-2 bg-white p-3 rounded-xl border-2 border-slate-800 shadow-sm">
+                        <i class="fa-solid fa-circle-check text-spekidu-green mt-1 text-base"></i>
+                        <span><strong>Menentukan KPK</strong> (Kelipatan Persekutuan Terkecil) dari dua atau lebih bilangan secara cermat.</span>
+                    </li>
+                    <li class="flex items-start gap-2 bg-white p-3 rounded-xl border-2 border-slate-800 shadow-sm">
+                        <i class="fa-solid fa-circle-check text-spekidu-green mt-1 text-base"></i>
+                        <span><strong>Membedakan penggunaan FPB dan KPK</strong> dalam situasi kehidupan sehari-hari di sekitar lingkungan Spekidu.</span>
+                    </li>
+                    <li class="flex items-start gap-2 bg-white p-3 rounded-xl border-2 border-slate-800 shadow-sm">
+                        <i class="fa-solid fa-circle-check text-spekidu-green mt-1 text-base"></i>
+                        <span><strong>Memecahkan masalah kontekstual</strong> seperti pembagian buah kantin, interval lampu perempatan, jadwal pengajian masjid, dan bola olahraga.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <button onclick="triggerLoadingTransition('screen-splash', 'Menuju Beranda...')" class="bg-spekidu-blue text-white font-black py-3 px-8 rounded-xl border-3 border-slate-900 shadow-cartoon-sm btn-cartoon">
+                <i class="fa-solid fa-house"></i> KEMBALI KE MISSION HUB
+            </button>
+        </section>
+
+        <!-- 4. INSTRUCTIONS SCREEN -->
+        <section id="screen-instructions" class="hidden w-full bg-white/95 rounded-3xl p-6 sm:p-8 border-4 border-slate-900 shadow-cartoon flex flex-col items-center">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="text-3xl bg-yellow-200 p-2 rounded-2xl border-2 border-slate-900 shadow-sm">❓</div>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 uppercase">PETUNJUK MATH MISSION</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-3xl mb-6">
+                <div class="bg-amber-50 border-3 border-slate-900 rounded-2xl p-4 flex flex-col items-center text-center shadow-sm">
+                    <span class="bg-spekidu-orange text-white w-7 h-7 rounded-full font-black flex items-center justify-center text-sm border border-slate-900 mb-2">1</span>
+                    <i class="fa-solid fa-id-card text-3xl text-spekidu-orange mb-1"></i>
+                    <h3 class="font-black text-slate-900 text-sm">LOGIN PEMAIN</h3>
+                    <p class="text-xs text-slate-600 font-bold mt-1">Isi Nama, Kelas, dan Nomor Absenmu secara benar.</p>
+                </div>
+
+                <div class="bg-emerald-50 border-3 border-slate-900 rounded-2xl p-4 flex flex-col items-center text-center shadow-sm">
+                    <span class="bg-spekidu-green text-white w-7 h-7 rounded-full font-black flex items-center justify-center text-sm border border-slate-900 mb-2">2</span>
+                    <i class="fa-solid fa-map-location-dot text-3xl text-spekidu-green mb-1"></i>
+                    <h3 class="font-black text-slate-900 text-sm">PILIH MISI</h3>
+                    <p class="text-xs text-slate-600 font-bold mt-1">Jelajahi 4 lokasi misi secara berurutan di sekitar Spekidu.</p>
+                </div>
+
+                <div class="bg-sky-50 border-3 border-slate-900 rounded-2xl p-4 flex flex-col items-center text-center shadow-sm">
+                    <span class="bg-spekidu-blue text-white w-7 h-7 rounded-full font-black flex items-center justify-center text-sm border border-slate-900 mb-2">3</span>
+                    <i class="fa-solid fa-book-open text-3xl text-spekidu-blue mb-1"></i>
+                    <h3 class="font-black text-slate-900 text-sm">BACA CERITA</h3>
+                    <p class="text-xs text-slate-600 font-bold mt-1">Pahami cerita dan kasus matematika pada lokasi tersebut.</p>
+                </div>
+
+                <div class="bg-purple-50 border-3 border-slate-900 rounded-2xl p-4 flex flex-col items-center text-center shadow-sm">
+                    <span class="bg-spekidu-purple text-white w-7 h-7 rounded-full font-black flex items-center justify-center text-sm border border-slate-900 mb-2">4</span>
+                    <i class="fa-solid fa-pen-to-square text-3xl text-spekidu-purple mb-1"></i>
+                    <h3 class="font-black text-slate-900 text-sm">JAWAB SOAL</h3>
+                    <p class="text-xs text-slate-600 font-bold mt-1">Pilih atau isi jawaban paling tepat dari pertanyaan.</p>
+                </div>
+
+                <div class="bg-rose-50 border-3 border-slate-900 rounded-2xl p-4 flex flex-col items-center text-center shadow-sm">
+                    <span class="bg-spekidu-red text-white w-7 h-7 rounded-full font-black flex items-center justify-center text-sm border border-slate-900 mb-2">5</span>
+                    <i class="fa-solid fa-coins text-3xl text-spekidu-red mb-1"></i>
+                    <h3 class="font-black text-slate-900 text-sm">KUMPULKAN POIN</h3>
+                    <p class="text-xs text-slate-600 font-bold mt-1">Setiap jawaban benar menghasilkan +100 poin!</p>
+                </div>
+
+                <div class="bg-yellow-50 border-3 border-slate-900 rounded-2xl p-4 flex flex-col items-center text-center shadow-sm">
+                    <span class="bg-spekidu-yellow text-slate-900 w-7 h-7 rounded-full font-black flex items-center justify-center text-sm border border-slate-900 mb-2">6</span>
+                    <i class="fa-solid fa-award text-3xl text-amber-500 mb-1"></i>
+                    <h3 class="font-black text-slate-900 text-sm">DAPATKAN LENCANA</h3>
+                    <p class="text-xs text-slate-600 font-bold mt-1">Selesaikan 4 misi untuk meraih Math Explorer Master!</p>
+                </div>
+            </div>
+
+            <div class="bg-yellow-100 border-2 border-slate-900 px-4 py-2 rounded-xl text-xs sm:text-sm font-black text-slate-800 mb-5 text-center">
+                ⭐ “Gunakan kemampuan berpikir dan jangan terburu-buru! Kamu pasti bisa!”
+            </div>
+
+            <button onclick="triggerLoadingTransition('screen-splash', 'Kembali ke Menu...')" class="bg-spekidu-blue text-white font-black py-3 px-8 rounded-xl border-3 border-slate-900 shadow-cartoon-sm btn-cartoon">
+                <i class="fa-solid fa-arrow-left"></i> KEMBALI
+            </button>
+        </section>
+
+        <!-- 5. MAIN MAP SCREEN -->
+        <section id="screen-map" class="hidden w-full bg-white/95 rounded-3xl p-5 sm:p-7 border-4 border-slate-900 shadow-cartoon flex flex-col items-center relative">
+            
+            <div class="w-full flex flex-wrap justify-between items-center gap-2 mb-4 border-b-3 border-slate-200 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🧭</span>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 uppercase">PETA MISI SPEKIDU</h2>
+                </div>
+                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border-2 border-slate-900">
+                    <span class="text-xs font-black text-slate-600">PROGRESS:</span>
+                    <span id="map-progress-text" class="text-xs font-black text-spekidu-blue">MISSION 1 / 4</span>
+                </div>
+            </div>
+
+            <div class="w-full bg-gradient-to-r from-amber-100 to-yellow-50 border-3 border-slate-900 rounded-2xl p-3 mb-4 flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-spekidu-orange text-white rounded-full flex items-center justify-center text-xl font-bold border-2 border-slate-900 shadow-sm">
+                        🎒
+                    </div>
+                    <div>
+                        <h3 id="map-welcome-text" class="font-black text-slate-900 text-sm sm:text-base">Halo, Explorer Spekidu!</h3>
+                        <p class="text-xs text-slate-600 font-extrabold">Klik lokasi misi di peta bawah ini untuk mulai bertualang.</p>
+                    </div>
+                </div>
+                <button onclick="triggerLoadingTransition('screen-splash', 'Kembali ke Menu Utama...')" class="text-xs bg-white px-3 py-1.5 rounded-lg border-2 border-slate-900 font-black hover:bg-slate-100 btn-cartoon">
+                    Menu
+                </button>
+            </div>
+
+            <div class="w-full bg-emerald-100 border-4 border-slate-900 rounded-2xl p-4 sm:p-6 relative overflow-hidden min-h-[360px] flex flex-col justify-between shadow-inner">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 z-10 my-auto">
+                    
+                    <div id="card-mission-1" onclick="startMissionWithLoading(1)" class="bg-white border-4 border-slate-900 rounded-2xl p-4 shadow-cartoon-sm cursor-pointer hover:scale-[1.02] transition-transform flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-red-100 border-2 border-slate-900 rounded-xl flex items-center justify-center text-2xl text-red-500 font-bold shadow-sm">
+                                🍎
+                            </div>
+                            <div>
+                                <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-900">MISI 1 • FPB</span>
+                                <h4 class="font-black text-slate-900 text-base leading-tight mt-0.5">Pasar Pedurungan</h4>
+                                <p class="text-xs text-slate-600 font-extrabold">Pembagian Apel Kantin</p>
+                            </div>
+                        </div>
+                        <div id="status-mission-1" class="text-right">
+                            <span class="bg-spekidu-green text-white px-2.5 py-1 rounded-xl text-xs font-black border-2 border-slate-900">MULAI ▶</span>
+                        </div>
+                    </div>
+
+                    <div id="card-mission-2" onclick="startMissionWithLoading(2)" class="bg-slate-100 border-4 border-slate-900 rounded-2xl p-4 opacity-75 cursor-not-allowed flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-amber-100 border-2 border-slate-900 rounded-xl flex items-center justify-center text-2xl text-amber-500 font-bold shadow-sm">
+                                🚦
+                            </div>
+                            <div>
+                                <span class="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-900">MISI 2 • KPK</span>
+                                <h4 class="font-black text-slate-900 text-base leading-tight mt-0.5">Lampu Lalu Lintas</h4>
+                                <p class="text-xs text-slate-600 font-extrabold">Interval Nyala Perempatan</p>
+                            </div>
+                        </div>
+                        <div id="status-mission-2" class="text-right">
+                            <span class="bg-slate-300 text-slate-600 px-2 py-1 rounded-xl text-xs font-black border-2 border-slate-900"><i class="fa-solid fa-lock"></i> Terkunci</span>
+                        </div>
+                    </div>
+
+                    <div id="card-mission-3" onclick="startMissionWithLoading(3)" class="bg-slate-100 border-4 border-slate-900 rounded-2xl p-4 opacity-75 cursor-not-allowed flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-emerald-100 border-2 border-slate-900 rounded-xl flex items-center justify-center text-2xl text-emerald-600 font-bold shadow-sm">
+                                🕌
+                            </div>
+                            <div>
+                                <span class="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-900">MISI 3 • KPK</span>
+                                <h4 class="font-black text-slate-900 text-base leading-tight mt-0.5">Masjid Belakang SD</h4>
+                                <p class="text-xs text-slate-600 font-extrabold">Jadwal Piket Pengajian</p>
+                            </div>
+                        </div>
+                        <div id="status-mission-3" class="text-right">
+                            <span class="bg-slate-300 text-slate-600 px-2 py-1 rounded-xl text-xs font-black border-2 border-slate-900"><i class="fa-solid fa-lock"></i> Terkunci</span>
+                        </div>
+                    </div>
+
+                    <div id="card-mission-4" onclick="startMissionWithLoading(4)" class="bg-slate-100 border-4 border-slate-900 rounded-2xl p-4 opacity-75 cursor-not-allowed flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-blue-100 border-2 border-slate-900 rounded-xl flex items-center justify-center text-2xl text-blue-600 font-bold shadow-sm">
+                                ⚽
+                            </div>
+                            <div>
+                                <span class="bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-900">MISI 4 • FPB & KPK</span>
+                                <h4 class="font-black text-slate-900 text-base leading-tight mt-0.5">Lapangan Zebra</h4>
+                                <p class="text-xs text-slate-600 font-extrabold">Jadwal Olahraga & Bola</p>
+                            </div>
+                        </div>
+                        <div id="status-mission-4" class="text-right">
+                            <span class="bg-slate-300 text-slate-600 px-2 py-1 rounded-xl text-xs font-black border-2 border-slate-900"><i class="fa-solid fa-lock"></i> Terkunci</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 6. GAMEPLAY SCREEN -->
+        <section id="screen-gameplay" class="hidden w-full bg-white/95 rounded-3xl p-4 sm:p-6 border-4 border-slate-900 shadow-cartoon flex flex-col gap-4">
+            
+            <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-100 p-3 rounded-2xl border-2 border-slate-900">
+                <div class="flex items-center gap-2">
+                    <span id="gameplay-mission-icon" class="text-2xl">🍎</span>
+                    <div>
+                        <h3 id="gameplay-mission-title" class="font-black text-slate-900 text-sm sm:text-base leading-tight">MISSION 1</h3>
+                        <span id="gameplay-materi-badge" class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-900">FPB</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="text-xs font-black text-slate-600">
+                        Soal <span id="current-q-num" class="text-spekidu-blue font-black text-sm">1</span> / 1
+                    </div>
+                    <button onclick="triggerLoadingTransition('screen-map', 'Kembali ke Peta Misi...')" class="bg-white border-2 border-slate-900 px-3 py-1 rounded-xl text-xs font-black hover:bg-slate-50 btn-cartoon">
+                        <i class="fa-solid fa-map"></i> Peta
+                    </button>
+                </div>
+            </div>
+
+            <div id="visual-context-box" class="w-full bg-sky-100 border-3 border-slate-900 rounded-2xl p-4 min-h-[140px] flex items-center justify-center relative overflow-hidden shadow-inner">
+                <div id="mission-animation-canvas" class="flex items-center justify-center gap-4 w-full">
+                </div>
+            </div>
+
+            <div class="bg-amber-50 border-3 border-slate-900 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <p id="question-story" class="text-xs sm:text-sm font-extrabold text-slate-700 leading-relaxed mb-3 italic">
+                </p>
+                <div class="border-t-2 border-dashed border-amber-300 pt-2">
+                    <h4 id="question-text" class="text-sm sm:text-base font-black text-slate-900 leading-snug">
+                    </h4>
+                </div>
+            </div>
+
+            <div id="options-grid" class="w-full">
+            </div>
+
+        </section>
+
+        <!-- 7. RESULT SCREEN -->
+        <section id="screen-result" class="hidden w-full bg-white/95 rounded-3xl p-6 sm:p-8 border-4 border-slate-900 shadow-cartoon flex flex-col items-center text-center">
+            
+            <div class="text-5xl mb-2 sparkle-anim">🏆</div>
+            <h1 class="text-3xl sm:text-4xl font-black text-spekidu-blue drop-shadow-sm uppercase">
+                MISSION COMPLETE!
+            </h1>
+            <p class="text-sm sm:text-base text-slate-700 font-extrabold mb-4">
+                Selamat! Kamu telah berhasil menjadi Ahli FPB & KPK SD N Pedurungan Kidul 02!
+            </p>
+
+            <div class="w-full max-w-xl bg-gradient-to-b from-yellow-50 to-amber-100 border-4 border-slate-900 rounded-2xl p-5 shadow-inner mb-6 text-left">
+                <div class="flex justify-between items-center border-b-2 border-slate-900 pb-3 mb-3">
+                    <div>
+                        <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block">Math Explorer Spekidu:</span>
+                        <h2 id="res-player-name" class="text-xl font-black text-slate-900">Nama Siswa</h2>
+                        <span id="res-player-class" class="text-xs font-black text-slate-600">Kelas 5 • No. Absen --</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-black text-slate-500">Predikat:</span>
+                        <div id="res-rank-badge" class="bg-spekidu-orange text-white px-3 py-1 rounded-xl border-2 border-slate-900 font-black text-xs">
+                            🏆 MATH EXPERT
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-center">
+                    <div class="bg-white p-2 rounded-xl border-2 border-slate-900 shadow-sm">
+                        <span class="text-[10px] font-black text-slate-500 block">SKOR AKHIR</span>
+                        <span id="res-score" class="text-lg font-black text-spekidu-blue">400</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border-2 border-slate-900 shadow-sm">
+                        <span class="text-[10px] font-black text-slate-500 block">BENAR</span>
+                        <span id="res-accuracy" class="text-lg font-black text-spekidu-green">4 / 4</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border-2 border-slate-900 shadow-sm">
+                        <span class="text-[10px] font-black text-slate-500 block">LENCANA</span>
+                        <span class="text-lg font-black text-spekidu-purple">4 / 4</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl border-2 border-slate-900 shadow-sm">
+                        <span class="text-[10px] font-black text-slate-500 block">SEKOLAH</span>
+                        <span class="text-[11px] font-black text-spekidu-red">SDN PK 02</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/90 border-2 border-slate-900 rounded-xl p-3 flex flex-col gap-1.5 text-xs font-black shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <span>🍎 Mission 1: Pasar Pedurungan (FPB)</span>
+                        <span id="res-m1-stars" class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>🚦 Mission 2: Lampu Lalu Lintas (KPK)</span>
+                        <span id="res-m2-stars" class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>🕌 Mission 3: Masjid Belakang SD (KPK)</span>
+                        <span id="res-m3-stars" class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>⚽ Mission 4: Lapangan Zebra (FPB & KPK)</span>
+                        <span id="res-m4-stars" class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-center gap-2 bg-yellow-300 border-2 border-slate-900 p-2.5 rounded-xl text-center shadow-sm">
+                    <i class="fa-solid fa-shield-halved text-2xl text-slate-900"></i>
+                    <span class="font-black text-slate-900 text-xs sm:text-sm">Lencana Resmi: 🏆 MATH EXPLORER SPEKIDU MASTER</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="resetGame()" class="bg-spekidu-green text-white font-black px-6 py-3 rounded-xl border-3 border-slate-900 shadow-cartoon-sm btn-cartoon flex items-center gap-2">
+                    🔄 MAIN LAGI
+                </button>
+                <button onclick="triggerLoadingTransition('screen-splash', 'Menuju Menu Beranda...')" class="bg-spekidu-blue text-white font-black px-6 py-3 rounded-xl border-3 border-slate-900 shadow-cartoon-sm btn-cartoon flex items-center gap-2">
+                    🏠 KEMBALI KE BERANDA
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FEEDBACK & HINT MODAL -->
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white border-4 border-slate-900 rounded-3xl p-6 max-w-md w-full shadow-cartoon flex flex-col items-center text-center">
+            <div id="modal-icon" class="text-5xl mb-2">🎉</div>
+            <h3 id="modal-title" class="text-2xl font-black text-slate-900 mb-1">BENAR!</h3>
+            <p id="modal-desc" class="text-sm font-bold text-slate-700 mb-4">Hebat sekali! Jawabanmu tepat.</p>
+            
+            <div id="modal-hint-box" class="hidden w-full bg-amber-50 border-2 border-slate-900 rounded-xl p-3 text-left mb-4 text-xs font-bold text-slate-800 shadow-sm">
+                <span class="font-black text-amber-900 flex items-center gap-1 mb-1">
+                    <i class="fa-solid fa-lightbulb text-yellow-500"></i> Petunjuk Langkah Penyelesaian:
+                </span>
+                <p id="hint-text-content" class="leading-relaxed"></p>
+            </div>
+
+            <div class="flex gap-3 w-full">
+                <button id="modal-btn-hint" onclick="showHintDetails()" class="hidden bg-yellow-400 text-slate-900 font-black py-2.5 px-4 rounded-xl border-2 border-slate-900 text-xs shadow-cartoon-sm btn-cartoon flex-1">
+                    🔎 LIHAT PETUNJUK
+                </button>
+                <button id="modal-btn-next" onclick="closeModalAndNext()" class="bg-spekidu-green text-white font-black py-3 px-6 rounded-xl border-3 border-slate-900 text-sm shadow-cartoon-btn btn-cartoon flex-1">
+                    LANJUT ▶
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="max-w-5xl mx-auto w-full text-center text-xs font-black text-slate-700 py-2">
+        SD N Pedurungan Kidul 02 Semarang • Media Pembelajaran Interaktif FPB & KPK Kelas 5 SD
+    </footer>
+
+    <!-- SCRIPT APPLICATION LOGIC & SYNTHESIZER -->
+    <script>
+        const gameState = {
+            player: {
+                name: "Explorer",
+                class: "5 A",
+                absent: 1
+            },
+            score: 0,
+            activeMission: 1,
+            currentQuestionIndex: 0,
+            missionProgress: {
+                1: { completed: false, stars: 0, correctCount: 0 },
+                2: { completed: false, stars: 0, correctCount: 0 },
+                3: { completed: false, stars: 0, correctCount: 0 },
+                4: { completed: false, stars: 0, correctCount: 0 }
+            },
+            audioEnabled: true,
+            bgmEnabled: true
+        };
+
+        const questionsData = {
+            1: [
+                {
+                    animationType: 'apples',
+                    type: 'tf',
+                    story: "Ibu Kantin SD N Pedurungan Kidul 02 membeli 24 apel merah dan 36 apel hijau dari Pasar Pedurungan. Ibu ingin membagikannya ke dalam beberapa wadah plastik dengan jumlah apel merah dan apel hijau yang sama banyak di setiap wadah.",
+                    question: "Pernyataan: Jumlah wadah plastik paling banyak yang dapat dibuat oleh Ibu Kantin adalah 12 buah (FPB dari 24 dan 36).",
+                    answer: 0,
+                    explanation: "FPB dari 24 dan 36 adalah 12. Pohon faktor: 24 = 2³ × 3, 36 = 2² × 3². FPB = 2² × 3 = 12 wadah."
+                }
+            ],
+            2: [
+                {
+                    animationType: 'traffic',
+                    type: 'input',
+                    story: "Di perempatan dekat SD N Pedurungan Kidul 02, lampu hijau untuk lajur Pasar menyala setiap 18 detik sekali, sedangkan lampu hijau lajur Kelurahan menyala setiap 24 detik sekali. Kedua lampu hijau baru saja menyala bersamaan.",
+                    question: "Berapa detik lagi kedua lampu hijau tersebut akan menyala bersamaan kembali? (Hitung KPK dari 18 dan 24)",
+                    answer: 72,
+                    explanation: "KPK dari 18 dan 24 adalah 72. Pohon faktor: 18 = 2 × 3², 24 = 2³ × 3. KPK = 2³ × 3² = 8 × 9 = 72 detik."
+                }
+            ],
+            3: [
+                {
+                    animationType: 'calendar',
+                    type: 'tf',
+                    story: "Pak Guru mengadakan jadwal piket kebersihan di Masjid Belakang Sekolah Spekidu. Kelompok A bertugas setiap 4 hari sekali, sedangkan Kelompok B bertugas setiap 6 hari sekali. Pada tanggal 1 Maret, kedua kelompok bertugas bersamaan.",
+                    question: "Pernyataan: Kelompok A dan Kelompok B akan bertugas bersama-sama lagi untuk kedua kalinya pada tanggal 13 Maret (KPK = 12 hari).",
+                    answer: 0,
+                    explanation: "KPK dari 4 dan 6 adalah 12 hari. Jadi mereka akan bertugas bersama lagi 12 hari setelah tanggal 1 Maret, yaitu 1 + 12 = tanggal 13 Maret."
+                }
+            ],
+            4: [
+                {
+                    animationType: 'sports',
+                    type: 'mc',
+                    story: "Siswa kelas 5 SD N Pedurungan Kidul 02 mengadakan latihan bola di Lapangan Zebra. Tim Merah berlatih setiap 6 hari sekali dan Tim Biru berlatih setiap 8 hari sekali. Selain itu, ada 32 bola sepak dan 48 bola voli yang ingin dibagikan ke beberapa kelompok latihan sama banyak.",
+                    question: "Berapa hari sekali Tim Merah & Biru berlatih bersama (KPK), serta berapa kelompok terbanyak yang menerima bola (FPB)?",
+                    options: [
+                        "A. KPK = 24 hari & FPB = 16 kelompok",
+                        "B. KPK = 48 hari & FPB = 8 kelompok",
+                        "C. KPK = 14 hari & FPB = 12 kelompok",
+                        "D. KPK = 24 hari & FPB = 8 kelompok"
+                    ],
+                    answer: 0,
+                    explanation: "KPK dari 6 dan 8 adalah 24 hari (KPK=2³×3=24). FPB dari 32 dan 48 adalah 16 (FPB=2⁴=16). Jawaban yang tepat adalah A."
+                }
+            ]
+        };
+
+        const mathTips = [
+            "FPB (Faktor Persekutuan Terbesar) berguna untuk membagikan benda ke wadah atau kelompok sama banyak!",
+            "KPK (Kelipatan Persekutuan Terkecil) digunakan untuk menentukan kapan dua kegiatan berlangsung bersamaan lagi!",
+            "Pohon Faktor sangat membantu menemukan faktor prima suatu bilangan dengan mudah.",
+            "Semakin sering berlatih soal kontekstual, kemampuan matematika kamu di Spekidu akan semakin tajam!"
+        ];
+
+        let audioCtx = null;
+        let bgmInterval = null;
+        let bgmStep = 0;
+        let bgmPlaying = false;
+        let loadingTimer = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        const bgmMelody = [
+            261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 440.00, 523.25,
+            349.23, 440.00, 523.25, 659.25, 523.25, 440.00, 392.00, 329.63
+        ];
+        const bgmBass = [
+            130.81, 130.81, 174.61, 174.61, 196.00, 196.00, 146.83, 196.00
+        ];
+
+        function playBgmNote() {
+            if (!gameState.bgmEnabled || !bgmPlaying) return;
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
+
+                const now = ctx.currentTime;
+                
+                const noteOsc = ctx.createOscillator();
+                const noteGain = ctx.createGain();
+                noteOsc.type = 'triangle';
+                noteOsc.frequency.setValueAtTime(bgmMelody[bgmStep % bgmMelody.length], now);
+                noteGain.gain.setValueAtTime(0.05, now);
+                noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+                noteOsc.connect(noteGain);
+                noteGain.connect(ctx.destination);
+                noteOsc.start(now);
+                noteOsc.stop(now + 0.2);
+
+                if (bgmStep % 2 === 0) {
+                    const bassOsc = ctx.createOscillator();
+                    const bassGain = ctx.createGain();
+                    bassOsc.type = 'sine';
+                    bassOsc.frequency.setValueAtTime(bgmBass[(Math.floor(bgmStep / 2)) % bgmBass.length], now);
+                    bassGain.gain.setValueAtTime(0.08, now);
+                    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    bassOsc.connect(bassGain);
+                    bassGain.connect(ctx.destination);
+                    bassOsc.start(now);
+                    bassOsc.stop(now + 0.38);
+                }
+
+                bgmStep++;
+            } catch (e) {
+                console.log("BGM error", e);
+            }
+        }
+
+        function startBgm() {
+            if (bgmPlaying) return;
+            bgmPlaying = true;
+            if (bgmInterval) clearInterval(bgmInterval);
+            bgmInterval = setInterval(playBgmNote, 220);
+        }
+
+        function stopBgm() {
+            bgmPlaying = false;
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        function toggleBGM() {
+            gameState.bgmEnabled = !gameState.bgmEnabled;
+            const icon = document.getElementById('bgm-icon');
+            if (gameState.bgmEnabled) {
+                icon.className = 'fa-solid fa-music text-base text-amber-900';
+                startBgm();
+                playSound('click');
+            } else {
+                icon.className = 'fa-solid fa-music text-base text-red-500 opacity-60';
+                stopBgm();
+            }
+        }
+
+        function playSound(type) {
+            if (!gameState.audioEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(420, now);
+                    osc.frequency.exponentialRampToValueAtTime(840, now + 0.08);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = ctx.createOscillator();
+                        const noteGain = ctx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(ctx.destination);
+                        
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        noteGain.gain.setValueAtTime(0.3, now + idx * 0.08);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
+                        
+                        noteOsc.start(now + idx * 0.08);
+                        noteOsc.stop(now + idx * 0.08 + 0.2);
+                    });
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(130, now + 0.25);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'victory') {
+                    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+                        const noteOsc = ctx.createOscillator();
+                        const noteGain = ctx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(ctx.destination);
+                        
+                        noteOsc.type = 'sine';
+                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        noteGain.gain.setValueAtTime(0.35, now + idx * 0.1);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+                        
+                        noteOsc.start(now + idx * 0.1);
+                        noteOsc.stop(now + idx * 0.1 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio play error");
+            }
+        }
+
+        function toggleAudio() {
+            gameState.audioEnabled = !gameState.audioEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (gameState.audioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-base';
+                playSound('click');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-base text-red-500';
+            }
+        }
+
+        function switchScreenDirect(screenId) {
+            if (gameState.bgmEnabled && !bgmPlaying) {
+                startBgm();
+            }
+            const screens = ['screen-loading', 'screen-splash', 'screen-login', 'screen-objectives', 'screen-instructions', 'screen-map', 'screen-gameplay', 'screen-result'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById(screenId);
+            if (target) target.classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function triggerLoadingTransition(targetScreen, titleText = "Memuat Halaman...", destIcon = "📍", callback = null) {
+            playSound('click');
+            
+            const screens = ['screen-splash', 'screen-login', 'screen-objectives', 'screen-instructions', 'screen-map', 'screen-gameplay', 'screen-result'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+
+            const loadingScreen = document.getElementById('screen-loading');
+            loadingScreen.classList.remove('hidden');
+
+            document.getElementById('loading-title').innerText = titleText;
+            document.getElementById('loading-destination-icon').innerText = destIcon;
+
+            const randomTip = mathTips[Math.floor(Math.random() * mathTips.length)];
+            document.getElementById('loading-tip').innerText = randomTip;
+
+            const progressBar = document.getElementById('loading-progress-bar');
+            progressBar.style.width = '0%';
+
+            let progress = 0;
+            if (loadingTimer) clearInterval(loadingTimer);
+
+            loadingTimer = setInterval(() => {
+                progress += 20;
+                progressBar.style.width = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(loadingTimer);
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden');
+                        switchScreenDirect(targetScreen);
+                        if (callback) callback();
+                    }, 250);
+                }
+            }, 110);
+        }
+
+        function startAppWithLoading() {
+            startBgm();
+            triggerLoadingTransition('screen-login', 'Membuka Form Login Spekidu Explorer...', '👤');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('input-name').value.trim() || 'Spekidu Explorer';
+            const cls = document.getElementById('input-class').value;
+            const absent = document.getElementById('input-absent').value || 1;
+
+            gameState.player.name = name;
+            gameState.player.class = cls;
+            gameState.player.absent = absent;
+
+            document.getElementById('nav-player-name').innerText = name;
+            document.getElementById('student-badge').classList.remove('hidden');
+            document.getElementById('student-badge').classList.add('flex');
+            document.getElementById('map-welcome-text').innerText = `Halo, ${name}! Siap menjadi Spekidu Explorer?`;
+
+            triggerLoadingTransition('screen-map', `Menyiapkan Peta Misi untuk ${name}...`, '🧭');
+        }
+
+        function updateMapUI() {
+            let completedCount = 0;
+            for (let i = 1; i <= 4; i++) {
+                const card = document.getElementById(`card-mission-${i}`);
+                const status = document.getElementById(`status-mission-${i}`);
+                const isCompleted = gameState.missionProgress[i].completed;
+
+                if (isCompleted) completedCount++;
+
+                if (i === 1 || gameState.missionProgress[i - 1].completed) {
+                    card.classList.remove('opacity-75', 'cursor-not-allowed', 'bg-slate-100');
+                    card.classList.add('bg-white', 'cursor-pointer');
+                    
+                    if (isCompleted) {
+                        status.innerHTML = `<span class="bg-spekidu-yellow text-slate-900 px-2.5 py-1 rounded-xl text-xs font-black border-2 border-slate-900 shadow-sm">✅ Selesai</span>`;
+                    } else {
+                        status.innerHTML = `<span class="bg-spekidu-green text-white px-2.5 py-1 rounded-xl text-xs font-black border-2 border-slate-900 shadow-sm">MULAI ▶</span>`;
+                    }
+                } else {
+                    card.classList.add('opacity-75', 'cursor-not-allowed', 'bg-slate-100');
+                    card.classList.remove('bg-white', 'cursor-pointer');
+                    status.innerHTML = `<span class="bg-slate-300 text-slate-600 px-2 py-1 rounded-xl text-xs font-black border-2 border-slate-900"><i class="fa-solid fa-lock"></i> Terkunci</span>`;
+                }
+            }
+
+            document.getElementById('map-progress-text').innerText = `MISSION ${Math.min(completedCount + 1, 4)} / 4`;
+            document.getElementById('nav-score').innerText = gameState.score;
+        }
+
+        function startMissionWithLoading(missionNum) {
+            if (missionNum > 1 && !gameState.missionProgress[missionNum - 1].completed) {
+                playSound('wrong');
+                alert("🔒 Misi ini masih terkunci! Selesaikan misi sebelumnya terlebih dahulu ya!");
+                return;
+            }
+
+            const icons = ["", "🍎", "🚦", "🕌", "⚽"];
+            const titles = ["", "Pasar Pedurungan", "Lampu Lalu Lintas", "Masjid Belakang SD", "Lapangan Zebra"];
+
+            triggerLoadingTransition('screen-gameplay', `Menuju Misi ${missionNum}: ${titles[missionNum]}...`, icons[missionNum], () => {
+                gameState.activeMission = missionNum;
+                gameState.currentQuestionIndex = 0;
+                renderGameplayQuestion();
+            });
+        }
+
+        function renderMissionAnimation(type) {
+            const container = document.getElementById('mission-animation-canvas');
+            container.innerHTML = '';
+
+            if (type === 'apples') {
+                container.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs font-black text-slate-700 mb-1">Apel Merah & Hijau</span>
+                            <div class="flex gap-1 text-2xl">
+                                <span class="floating">🍎</span>
+                                <span class="floating" style="animation-delay:0.3s">🍏</span>
+                                <span class="floating" style="animation-delay:0.6s">🍎</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-arrow-right text-slate-600 text-xl"></i>
+                        <div class="flex flex-col items-center bg-white p-2 rounded-xl border-2 border-slate-900 shadow-sm">
+                            <span class="text-xs font-black text-slate-800">Keranjang FPB (Sama Banyak)</span>
+                            <div class="text-3xl">🧺</div>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'traffic') {
+                container.innerHTML = `
+                    <div class="flex items-center gap-6">
+                        <div class="bg-slate-900 p-2 rounded-xl border-2 border-slate-900 flex flex-col items-center gap-1.5 shadow-md">
+                            <div class="w-4 h-4 rounded-full bg-red-500 opacity-40"></div>
+                            <div class="w-4 h-4 rounded-full bg-yellow-400 opacity-40"></div>
+                            <div class="w-4 h-4 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400"></div>
+                        </div>
+                        <div class="text-center font-black text-xs text-slate-800">
+                            <div class="text-2xl mb-1">⏱️</div>
+                            Timer Interval (18s & 24s)
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded-xl border-2 border-slate-900 flex flex-col items-center gap-1.5 shadow-md">
+                            <div class="w-4 h-4 rounded-full bg-red-500 opacity-40"></div>
+                            <div class="w-4 h-4 rounded-full bg-yellow-400 opacity-40"></div>
+                            <div class="w-4 h-4 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400" style="animation-delay:0.5s"></div>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'calendar') {
+                container.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="bg-white border-2 border-slate-900 rounded-xl p-3 shadow-sm text-center">
+                            <span class="bg-spekidu-red text-white text-[10px] font-black px-2 py-0.5 rounded block">MASJID SPEKIDU</span>
+                            <div class="text-3xl my-1">📅</div>
+                            <span class="text-[11px] font-black text-slate-800">Jadwal Pengajian</span>
+                        </div>
+                        <div class="text-spekidu-green text-xl font-black animate-bounce">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'sports') {
+                container.innerHTML = `
+                    <div class="flex items-center gap-5">
+                        <div class="text-center">
+                            <div class="text-3xl floating">⚽</div>
+                            <span class="text-[10px] font-black text-slate-800">Tim Olahraga</span>
+                        </div>
+                        <div class="h-8 w-0.5 bg-slate-400"></div>
+                        <div class="text-center">
+                            <div class="text-3xl floating" style="animation-delay:0.4s">🏃‍♂️</div>
+                            <span class="text-[10px] font-black text-slate-800">Lapangan Zebra</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderGameplayQuestion() {
+            const mNum = gameState.activeMission;
+            const qIdx = gameState.currentQuestionIndex;
+            const qData = questionsData[mNum][qIdx];
+
+            const titles = ["", "MISSION 1 — PASAR PEDURUNGAN", "MISSION 2 — LAMPU LALU LINTAS", "MISSION 3 — MASJID BELAKANG SD", "MISSION 4 — LAPANGAN ZEBRA"];
+            const icons = ["", "🍎", "🚦", "🕌", "⚽"];
+            const badges = ["", "FPB • Benar/Salah", "KPK • Isian Angka", "KPK • Benar/Salah", "FPB & KPK • Pilihan Ganda"];
+            const badgeColors = ["", "bg-red-500", "bg-amber-500", "bg-emerald-600", "bg-blue-600"];
+
+            document.getElementById('gameplay-mission-icon').innerText = icons[mNum];
+            document.getElementById('gameplay-mission-title').innerText = titles[mNum];
+            document.getElementById('gameplay-materi-badge').innerText = badges[mNum];
+            document.getElementById('gameplay-materi-badge').className = `${badgeColors[mNum]} text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-slate-900`;
+            document.getElementById('current-q-num').innerText = 1;
+
+            renderMissionAnimation(qData.animationType);
+
+            document.getElementById('question-story').innerText = qData.story;
+            document.getElementById('question-text').innerText = qData.question;
+
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            if (qData.type === 'tf') {
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 w-full";
+                
+                const btnTrue = document.createElement('button');
+                btnTrue.className = "bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg py-4 px-6 rounded-2xl border-4 border-slate-900 shadow-cartoon-btn btn-cartoon flex items-center justify-center gap-3";
+                btnTrue.innerHTML = `<i class="fa-solid fa-circle-check text-2xl"></i> BENAR 👍`;
+                btnTrue.onclick = () => handleAnswerSelect(0, btnTrue);
+
+                const btnFalse = document.createElement('button');
+                btnFalse.className = "bg-rose-500 hover:bg-rose-600 text-white font-black text-lg py-4 px-6 rounded-2xl border-4 border-slate-900 shadow-cartoon-btn btn-cartoon flex items-center justify-center gap-3";
+                btnFalse.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl"></i> SALAH 👎`;
+                btnFalse.onclick = () => handleAnswerSelect(1, btnFalse);
+
+                grid.appendChild(btnTrue);
+                grid.appendChild(btnFalse);
+
+            } else if (qData.type === 'input') {
+                grid.className = "flex flex-col items-center gap-3 w-full max-w-md mx-auto";
+                
+                const inputWrap = document.createElement('div');
+                inputWrap.className = "w-full bg-amber-100 p-4 border-3 border-slate-900 rounded-2xl flex flex-col items-center gap-3 shadow-sm";
+                inputWrap.innerHTML = `
+                    <label class="font-black text-slate-800 text-xs sm:text-sm">Masukkan Jawaban Angka:</label>
+                    <input type="number" id="numeric-user-input" placeholder="Ketik angka di sini..." class="w-full text-center text-2xl font-black py-3 px-4 bg-white border-3 border-slate-900 rounded-xl focus:outline-none focus:ring-4 focus:ring-yellow-300">
+                    <div class="flex flex-wrap gap-2 justify-center w-full">
+                        <button type="button" onclick="setQuickInput(72)" class="text-xs bg-white border-2 border-slate-900 px-3 py-1 rounded-lg font-black hover:bg-slate-100">72</button>
+                        <button type="button" onclick="setQuickInput(36)" class="text-xs bg-white border-2 border-slate-900 px-3 py-1 rounded-lg font-black hover:bg-slate-100">36</button>
+                        <button type="button" onclick="setQuickInput(48)" class="text-xs bg-white border-2 border-slate-900 px-3 py-1 rounded-lg font-black hover:bg-slate-100">48</button>
+                        <button type="button" onclick="setQuickInput(144)" class="text-xs bg-white border-2 border-slate-900 px-3 py-1 rounded-lg font-black hover:bg-slate-100">144</button>
+                    </div>
+                    <button type="button" onclick="handleInputSubmit()" class="w-full bg-spekidu-green hover:bg-emerald-600 text-white font-black text-base py-3 rounded-xl border-3 border-slate-900 shadow-cartoon-btn btn-cartoon mt-1">
+                        🟢 KIRIM JAWABAN
+                    </button>
+                `;
+                grid.appendChild(inputWrap);
+
+            } else {
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-3 w-full";
+                qData.options.forEach((optText, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = "bg-white hover:bg-sky-50 border-3 border-slate-900 rounded-2xl p-4 text-left font-black text-slate-800 text-xs sm:text-sm shadow-cartoon-sm btn-cartoon flex items-center justify-between";
+                    btn.innerHTML = `<span>${optText}</span> <i class="fa-regular fa-circle text-slate-400"></i>`;
+                    btn.onclick = () => handleAnswerSelect(i, btn);
+                    grid.appendChild(btn);
+                });
+            }
+        }
+
+        function setQuickInput(val) {
+            playSound('click');
+            const inp = document.getElementById('numeric-user-input');
+            if (inp) inp.value = val;
+        }
+
+        function handleInputSubmit() {
+            const inp = document.getElementById('numeric-user-input');
+            if (!inp || inp.value === "") {
+                playSound('wrong');
+                alert("Isi angka jawabanmu terlebih dahulu ya!");
+                return;
+            }
+            const userVal = parseInt(inp.value, 10);
+            const qData = questionsData[gameState.activeMission][0];
+            
+            const isCorrect = (userVal === qData.answer);
+            showFeedbackModal(isCorrect, qData);
+        }
+
+        function handleAnswerSelect(optIndex, btnElement) {
+            const mNum = gameState.activeMission;
+            const qData = questionsData[mNum][0];
+            const isCorrect = (optIndex === qData.answer);
+            showFeedbackModal(isCorrect, qData);
+        }
+
+        function showFeedbackModal(isCorrect, qData) {
+            const mNum = gameState.activeMission;
+            const modal = document.getElementById('feedback-modal');
+            const mIcon = document.getElementById('modal-icon');
+            const mTitle = document.getElementById('modal-title');
+            const mDesc = document.getElementById('modal-desc');
+            const hintBox = document.getElementById('modal-hint-box');
+            const hintBtn = document.getElementById('modal-btn-hint');
+            const nextBtn = document.getElementById('modal-btn-next');
+
+            hintBox.classList.add('hidden');
+
+            if (isCorrect) {
+                playSound('correct');
+                confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 } });
+
+                gameState.score += 100;
+                gameState.missionProgress[mNum].correctCount = 1;
+                document.getElementById('nav-score').innerText = gameState.score;
+
+                mIcon.innerText = "🎉";
+                mTitle.innerText = "BENAR!";
+                mTitle.className = "text-2xl font-black text-spekidu-green mb-1";
+                mDesc.innerText = "Hebat! Jawabannya tepat (+100 Poin).";
+
+                hintBtn.classList.add('hidden');
+                nextBtn.innerText = "LANJUT ▶";
+                nextBtn.className = "bg-spekidu-green text-white font-black py-3 px-6 rounded-xl border-3 border-slate-900 text-sm shadow-cartoon-btn btn-cartoon flex-1";
+
+            } else {
+                playSound('wrong');
+
+                mIcon.innerText = "💡";
+                mTitle.innerText = "BELUM TEPAT";
+                mTitle.className = "text-2xl font-black text-spekidu-orange mb-1";
+                mDesc.innerText = "Tidak apa-apa! Coba perhatikan kembali petunjuk langkahnya.";
+
+                document.getElementById('hint-text-content').innerText = qData.explanation;
+
+                hintBtn.classList.remove('hidden');
+                nextBtn.innerText = "COBA LAGI / LANJUT";
+                nextBtn.className = "bg-spekidu-blue text-white font-black py-3 px-6 rounded-xl border-3 border-slate-900 text-sm shadow-cartoon-btn btn-cartoon flex-1";
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function showHintDetails() {
+            playSound('click');
+            const hintBox = document.getElementById('modal-hint-box');
+            hintBox.classList.remove('hidden');
+        }
+
+        function closeModalAndNext() {
+            playSound('click');
+            const modal = document.getElementById('feedback-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            finishCurrentMission();
+        }
+
+        function finishCurrentMission() {
+            const mNum = gameState.activeMission;
+            const progress = gameState.missionProgress[mNum];
+            progress.completed = true;
+
+            if (progress.correctCount === 1) {
+                gameState.score += 25;
+            }
+
+            updateMapUI();
+
+            if (mNum < 4) {
+                playSound('victory');
+                triggerLoadingTransition('screen-map', `🎉 MISI ${mNum} SELESAI! Menyiapkan Peta Misi Spekidu...`, '🧭');
+            } else {
+                gameState.score += 100;
+                renderFinalResults();
+                triggerLoadingTransition('screen-result', 'Menyiapkan Sertifikat Kemenangan Spekidu...', '🏆', () => {
+                    playSound('victory');
+                    confetti({ particleCount: 160, spread: 100, origin: { y: 0.5 } });
+                });
+            }
+        }
+
+        function renderFinalResults() {
+            document.getElementById('res-player-name').innerText = gameState.player.name;
+            document.getElementById('res-player-class').innerText = `Kelas ${gameState.player.class} • No. Absen ${gameState.player.absent}`;
+            document.getElementById('res-score').innerText = gameState.score.toLocaleString('id-ID');
+
+            let totalCorrect = 0;
+            for (let i = 1; i <= 4; i++) {
+                totalCorrect += gameState.missionProgress[i].correctCount;
+            }
+            document.getElementById('res-accuracy').innerText = `${totalCorrect} / 4`;
+
+            let rank = "SPEKIDU EXPLORER";
+            let rankClass = "bg-spekidu-purple text-white";
+
+            if (gameState.score >= 500) {
+                rank = "🏆 MATH MASTER";
+                rankClass = "bg-spekidu-green text-white";
+            } else if (gameState.score >= 400) {
+                rank = "🥇 MATH EXPERT";
+                rankClass = "bg-spekidu-blue text-white";
+            } else if (gameState.score >= 250) {
+                rank = "🥈 MATH EXPLORER";
+                rankClass = "bg-spekidu-orange text-white";
+            } else {
+                rank = "🥉 KEEP EXPLORING";
+                rankClass = "bg-slate-700 text-white";
+            }
+
+            const badgeEl = document.getElementById('res-rank-badge');
+            badgeEl.innerText = rank;
+            badgeEl.className = `${rankClass} px-3 py-1 rounded-xl border-2 border-slate-900 font-black text-xs shadow-sm`;
+
+            for (let i = 1; i <= 4; i++) {
+                const count = gameState.missionProgress[i].correctCount;
+                let starStr = count === 1 ? "⭐⭐⭐⭐⭐" : "⭐☆☆☆☆";
+                document.getElementById(`res-m${i}-stars`).innerText = starStr;
+            }
+        }
+
+        function resetGame() {
+            gameState.score = 0;
+            gameState.activeMission = 1;
+            gameState.currentQuestionIndex = 0;
+            for (let i = 1; i <= 4; i++) {
+                gameState.missionProgress[i] = { completed: false, stars: 0, correctCount: 0 };
+            }
+
+            document.getElementById('nav-score').innerText = 0;
+            updateMapUI();
+            triggerLoadingTransition('screen-map', 'Mereset Pertualangan & Menyiapkan Peta...', '🔄');
+        }
+
+        window.onload = function() {
+            updateMapUI();
+        };
+    </script>
+</body>
+</html>
